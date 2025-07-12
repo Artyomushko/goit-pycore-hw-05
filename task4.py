@@ -1,32 +1,51 @@
+def input_error(func):
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ValueError:
+            return "Give me name and phone please."
+        except IndexError:
+            return "Give me name please."
+        except KeyError:
+            return "No such contact."
+
+    return inner
+
+
+@input_error
 def parse_input(user_input: str) -> tuple:
     cmd, *args = user_input.split()
     cmd = cmd.strip().lower()
     return cmd, *args
 
-def add_contact(args: tuple[str, str], contacts: dict) -> dict:
+
+@input_error
+def add_contact(args: tuple[str, str], contacts: dict) -> str:
     name, phone = args
     contacts[name] = phone
-    return contacts
+    return "Contact added."
 
-def change_contact(args: tuple[str, str], contacts: dict) -> dict:
+
+@input_error
+def change_contact(args: tuple[str, str], contacts: dict) -> str:
     name, phone = args
 
     if name not in contacts:
-        raise ValueError('No such contact')
+        raise KeyError(f"No such contact: {name}")
 
     contacts[name] = phone
-    return contacts
+    return "Contact updated."
 
+
+@input_error
 def show_phone(args: tuple[str], contacts: dict) -> str:
     name = args[0]
-
-    if name not in contacts:
-        raise ValueError('No such contact')
-
     return contacts[name]
+
 
 def show_all(args: tuple[str, str], contacts: dict) -> dict:
     return contacts
+
 
 def main() -> None:
     contacts = {}
@@ -41,23 +60,16 @@ def main() -> None:
         elif command == "hello":
             print("How can I help you?")
         elif command == "add":
-            add_contact(args, contacts)
-            print("Contact added.")
+            print(add_contact(args, contacts))
         elif command == "change":
-            try:
-                change_contact(args, contacts)
-                print("Contact updated.")
-            except ValueError as e:
-                print(e)
+            print(change_contact(args, contacts))
         elif command == "show":
-            try:
-                print(show_phone(args, contacts))
-            except ValueError as e:
-                print(e)
+            print(show_phone(args, contacts))
         elif command == "all":
             print(show_all(args, contacts))
         else:
             print("Invalid command.")
+
 
 if __name__ == "__main__":
     main()
